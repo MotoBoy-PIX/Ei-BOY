@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motoboy SP - Agradecimento</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                        url('https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 600px;
+            padding: 30px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+            margin: 20px;
+        }
+
+        h1 {
+            color: #FFD700;
+            font-size: 28px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        .message {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .pix-box {
+            background-color: rgba(40, 40, 40, 0.9);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 25px 0;
+            border-left: 4px solid #FFD700;
+        }
+
+        .pix-key {
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            word-break: break-all;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            margin: 15px 0;
+            display: inline-block;
+        }
+
+        .copy-btn {
+            background-color: #32CD32;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background-color: #228B22;
+            transform: scale(1.05);
+        }
+
+        .success-msg {
+            color: #32CD32;
+            display: none;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .signature {
+            font-style: italic;
+            margin-top: 30px;
+            font-size: 16px;
+        }
+
+        .qr-code {
+            margin: 20px 0;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        .highlight {
+            color: #FFD700;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ENTREGUEI SUA ENCOMENDA... E AGORA ENTREGO UM PEDIDO!</h1>
+        
+        <div class="message">
+            <p>Fala aí! Sou motoboy das ruas e dos corres. Enquanto levo suas encomendas, também tô tentando correr atrás dos meus sonhos.</p>
+            
+            <p>Se quiser me dar uma força — com um café, uma ajuda na gasolina, ou só uma boa energia — já tá valendo demais!</p>
+        </div>
+        
+        <div class="pix-box">
+            <h2>📲 Chave Pix:</h2>
+            <div class="pix-key" id="pixKey">0c397cfc-9a35-4be7-a550-3fcb5c9d1afb</div>
+            <button class="copy-btn" onclick="copyPixKey()">Copiar Chave</button>
+            <div class="success-msg" id="successMsg">Chave copiada com sucesso!</div>
+            
+            <div class="qr-code">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=pix:0c397cfc-9a35-4be7-a550-3fcb5c9d1afb" alt="QR Code Pix">
+            </div>
+        </div>
+        
+        <div class="message">
+            <p><span class="highlight">Obs:</span> Pode ser um lanche, um real ou só aquele "vai na fé"!</p>
+        </div>
+        
+        <div class="signature">
+            Valeu pela moral! 🙏✌️
+        </div>
+    </div>
+
+    <!-- Áudios -->
+    <audio id="motoSound" src="https://www.soundjay.com/mechanics/sounds/moped-01.mp3" preload="auto"></audio>
+    <audio id="buzinaSound" src="https://www.soundjay.com/mechanics/sounds/moped-horn-01.mp3" preload="auto"></audio>
+
+    <script>
+        // Função para copiar a chave Pix + buzina
+        function copyPixKey() {
+            // Toca a buzina
+            const buzina = document.getElementById('buzinaSound');
+            buzina.play().catch(e => console.log("Clique novamente para ativar o som"));
+            
+            // Copia a chave
+            const pixKey = document.getElementById('pixKey').innerText;
+            navigator.clipboard.writeText(pixKey).then(() => {
+                const successMsg = document.getElementById('successMsg');
+                successMsg.style.display = 'block';
+                setTimeout(() => {
+                    successMsg.style.display = 'none';
+                }, 2000);
+            });
+        }
+
+        // Tocar som da moto a cada 3 minutos (mantido da versão original)
+        function playMotoSound() {
+            const sound = document.getElementById('motoSound');
+            sound.play();
+        }
+
+        window.onload = function() {
+            playMotoSound();
+            setInterval(playMotoSound, 180000);
+        };
+    </script>
+</body>
+</html>
