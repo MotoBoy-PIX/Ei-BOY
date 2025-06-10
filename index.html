@@ -100,11 +100,39 @@
             padding: 10px;
             border-radius: 5px;
             display: inline-block;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+
+        .qr-code:hover {
+            transform: scale(1.05);
         }
 
         .highlight {
             color: #FFD700;
             font-weight: bold;
+        }
+
+        .counters {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #aaa;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .counter-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 5px;
+        }
+
+        .counter-number {
+            font-weight: bold;
+            color: #FFD700;
+            font-size: 18px;
         }
     </style>
 </head>
@@ -124,8 +152,19 @@
             <button class="copy-btn" onclick="copyPixKey()">Copiar Chave</button>
             <div class="success-msg" id="successMsg">Chave copiada com sucesso!</div>
             
-            <div class="qr-code">
+            <div class="qr-code" id="qrCode" title="Clique para contar a visualização">
                 <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=pix:0c397cfc-9a35-4be7-a550-3fcb5c9d1afb" alt="QR Code Pix">
+            </div>
+        </div>
+        
+        <div class="counters">
+            <div class="counter-box">
+                <div>QR Code visualizado</div>
+                <div class="counter-number" id="qrViews">0</div>
+            </div>
+            <div class="counter-box">
+                <div>Chaves copiadas</div>
+                <div class="counter-number" id="copyCount">0</div>
             </div>
         </div>
         
@@ -143,6 +182,19 @@
     <audio id="buzinaSound" src="https://www.soundjay.com/mechanics/sounds/moped-horn-01.mp3" preload="auto"></audio>
 
     <script>
+        // Inicializa contadores
+        function initializeCounters() {
+            if (!localStorage.getItem('qrViews')) {
+                localStorage.setItem('qrViews', '0');
+            }
+            if (!localStorage.getItem('copyCount')) {
+                localStorage.setItem('copyCount', '0');
+            }
+            
+            document.getElementById('qrViews').textContent = localStorage.getItem('qrViews');
+            document.getElementById('copyCount').textContent = localStorage.getItem('copyCount');
+        }
+
         // Função para copiar a chave Pix + buzina
         function copyPixKey() {
             // Toca a buzina
@@ -152,6 +204,12 @@
             // Copia a chave
             const pixKey = document.getElementById('pixKey').innerText;
             navigator.clipboard.writeText(pixKey).then(() => {
+                // Incrementa contador de cópias
+                let copyCount = parseInt(localStorage.getItem('copyCount')) || 0;
+                copyCount++;
+                localStorage.setItem('copyCount', copyCount.toString());
+                document.getElementById('copyCount').textContent = copyCount;
+                
                 const successMsg = document.getElementById('successMsg');
                 successMsg.style.display = 'block';
                 setTimeout(() => {
@@ -160,15 +218,27 @@
             });
         }
 
-        // Tocar som da moto a cada 3 minutos (mantido da versão original)
+        // Contador de visualizações do QR Code
+        function trackQRView() {
+            let qrViews = parseInt(localStorage.getItem('qrViews')) || 0;
+            qrViews++;
+            localStorage.setItem('qrViews', qrViews.toString());
+            document.getElementById('qrViews').textContent = qrViews;
+        }
+
+        // Tocar som da moto a cada 3 minutos
         function playMotoSound() {
             const sound = document.getElementById('motoSound');
             sound.play();
         }
 
         window.onload = function() {
+            initializeCounters();
             playMotoSound();
             setInterval(playMotoSound, 180000);
+            
+            // Adiciona evento de clique no QR Code
+            document.getElementById('qrCode').addEventListener('click', trackQRView);
         };
     </script>
 </body>
