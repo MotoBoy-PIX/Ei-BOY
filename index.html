@@ -169,6 +169,21 @@
             vertical-align: middle;
             margin: 0 5px;
         }
+
+        #resetBtn {
+            background: #ff0000;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+            cursor: pointer;
+            display: none; /* Inicialmente escondido */
+        }
+
+        #resetBtn:hover {
+            background: #cc0000;
+        }
     </style>
 </head>
 <body>
@@ -201,17 +216,30 @@
                 <div class="stat-number" id="copyCount">0</div>
             </div>
         </div>
+
+        <button id="resetBtn">Zerar Contadores</button>
     </div>
 
     <script>
+        // Verifica se é um novo dia
+        const lastAccessDate = localStorage.getItem('lastAccessDate');
+        const today = new Date().toDateString();
+        
+        // Se for um novo dia, zera os contadores
+        if (!lastAccessDate || lastAccessDate !== today) {
+            localStorage.setItem('accessCount', 0);
+            localStorage.setItem('copyCount', 0);
+            localStorage.setItem('lastAccessDate', today);
+        }
+
         // Contador de acessos
-        let accessCount = localStorage.getItem('accessCount') || 0;
+        let accessCount = parseInt(localStorage.getItem('accessCount')) || 0;
         accessCount++;
         localStorage.setItem('accessCount', accessCount);
         document.getElementById('accessCount').textContent = accessCount;
 
         // Contador de cópias
-        let copyCount = localStorage.getItem('copyCount') || 0;
+        let copyCount = parseInt(localStorage.getItem('copyCount')) || 0;
         document.getElementById('copyCount').textContent = copyCount;
 
         // Função para copiar PIX
@@ -263,6 +291,25 @@
                 }, 1000);
             }
         }
+
+        // Botão de reset (aparece somente se pressionar Ctrl+Alt+R)
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.altKey && e.key === 'r') {
+                document.getElementById('resetBtn').style.display = 'inline-block';
+            }
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            if(confirm('Tem certeza que deseja zerar TODOS os contadores?')) {
+                localStorage.setItem('accessCount', 0);
+                localStorage.setItem('copyCount', 0);
+                localStorage.setItem('lastAccessDate', today);
+                document.getElementById('accessCount').textContent = 0;
+                document.getElementById('copyCount').textContent = 0;
+                alert('Contadores zerados com sucesso!');
+                this.style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>
