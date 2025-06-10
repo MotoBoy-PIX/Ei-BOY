@@ -178,11 +178,21 @@
             border-radius: 5px;
             margin-top: 20px;
             cursor: pointer;
-            display: none; /* Inicialmente escondido */
+            display: none;
         }
 
         #resetBtn:hover {
             background: #cc0000;
+        }
+
+        .lgpd-warning {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-left: 4px solid #ffcc00;
+            padding: 10px 15px;
+            margin: 20px 0;
+            font-size: 0.9rem;
+            text-align: left;
+            border-radius: 0 5px 5px 0;
         }
     </style>
 </head>
@@ -192,6 +202,10 @@
 
     <div class="container">
         <h1>ENTREGUEI SUA ENCOMENDA... <br>E AGORA ENTREGO UM PEDIDO!</h1>
+        
+        <div class="lgpd-warning">
+            <p>🔒 Este site não coleta dados pessoais. Os contadores usam apenas localStorage anônimo, sem identificação individual.</p>
+        </div>
         
         <p>Fala aí! Sou motoboy das ruas e dos corres. Enquanto levo suas encomendas, também tô tentando correr atrás dos meus sonhos!</p>
         
