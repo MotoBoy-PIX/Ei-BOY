@@ -8,7 +8,7 @@
         body {
             font-family: 'Arial', sans-serif;
             background-color: #ff6b6b;
-            background-image:
+            background-image: 
                 linear-gradient(45deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%, transparent),
                 repeating-linear-gradient(-45deg, #ff8a00, #ff8a00 10px, #e52e71 10px, #e52e71 20px);
             color: #fff;
@@ -68,50 +68,71 @@
             color: #8a6d00;
             border: none;
             border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            font-size: 0.75rem;
-            font-weight: bold;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
             cursor: pointer;
             margin-left: 15px;
-            transition: transform 0.4s ease-in-out;
+            transition: all 0.3s;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
             position: relative;
             overflow: hidden;
-            text-align: center;
         }
 
-        .copy-btn.spin {
-            animation: spin 0.6s ease-out;
+        .copy-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0); }
-            100% { transform: rotate(360deg); }
+        .copy-btn:active {
+            transform: scale(0.95);
         }
 
         .coin {
             position: absolute;
-            width: 16px;
-            height: 16px;
+            width: 20px;
+            height: 20px;
             background-color: gold;
             border-radius: 50%;
-            animation: coin-pop 1s ease-out forwards;
+            opacity: 0;
             pointer-events: none;
+            animation: coin-pop 1s ease-out;
         }
 
         @keyframes coin-pop {
             0% {
-                transform: translate(0, 0) scale(1);
+                transform: translateY(0) scale(0.5);
                 opacity: 1;
             }
             100% {
-                transform: translate(var(--x), var(--y)) scale(0.8);
+                transform: translateY(-100px) scale(1);
                 opacity: 0;
             }
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        .stat-box {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            min-width: 120px;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffcc00;
+            margin-top: 5px;
         }
 
         .ft-bg {
@@ -181,26 +202,29 @@
 
     <div class="container">
         <h1>ENTREGUEI SUA ENCOMENDA... <br>E AGORA ENTREGO UM PEDIDO!</h1>
-
+        
         <div class="lgpd-warning">
             <p>🔒 Este site não coleta dados pessoais. Os contadores usam apenas localStorage anônimo, sem identificação individual.</p>
         </div>
-
+        
         <p>Fala aí! Sou motoboy das ruas e dos corres. Enquanto levo suas encomendas, também tô tentando correr atrás dos meus sonhos!</p>
-
+        
         <p>Se quiser me dar uma força com um café, uma ajuda na gasolina, ou só uma boa energia... já tá valendo demais.</p>
-
+        
         <p>Pode ser um lanche, um real ou só aquele "vai na fé"!</p>
-
+        
         <div class="pix-container">
             <div class="pix-key" id="pixKey">0c397cfc-9a35-4be7-a550-3fcb5c9d1afb</div>
-            <button class="copy-btn" id="copyBtn">Cópia e Cola</button>
+            <button class="copy-btn" id="copyBtn">R$</button>
         </div>
-
+        
         <p class="signature">Valeu pela moral! <span class="emoji">🙏✌️🏍️💨</span></p>
-
+        
         <div class="stats">
-            <!-- Apenas o contador de cópias permanece -->
+            <div class="stat-box">
+                <div>Acessos</div>
+                <div class="stat-number" id="accessCount">0</div>
+            </div>
             <div class="stat-box">
                 <div>PIX Copiados</div>
                 <div class="stat-number" id="copyCount">0</div>
@@ -211,41 +235,95 @@
     </div>
 
     <script>
+        // Verifica se é um novo dia
+        const lastAccessDate = localStorage.getItem('lastAccessDate');
+        const today = new Date().toDateString();
+        
+        // Se for um novo dia, zera os contadores
+        if (!lastAccessDate || lastAccessDate !== today) {
+            localStorage.setItem('accessCount', 0);
+            localStorage.setItem('copyCount', 0);
+            localStorage.setItem('lastAccessDate', today);
+        }
+
+        // Contador de acessos
+        let accessCount = parseInt(localStorage.getItem('accessCount')) || 0;
+        accessCount++;
+        localStorage.setItem('accessCount', accessCount);
+        document.getElementById('accessCount').textContent = accessCount;
+
         // Contador de cópias
         let copyCount = parseInt(localStorage.getItem('copyCount')) || 0;
         document.getElementById('copyCount').textContent = copyCount;
 
-        // Copiar PIX + animações
-        document.getElementById('copyBtn').addEventListener('click', function () {
+        // Função para copiar PIX
+        document.getElementById('copyBtn').addEventListener('click', function() {
             const pixKey = document.getElementById('pixKey').textContent;
-            navigator.clipboard.writeText(pixKey).then(function () {
-                const btn = document.getElementById('copyBtn');
-                btn.classList.add('spin');
-                createCoins(btn);
-
+            navigator.clipboard.writeText(pixKey).then(function() {
+                // Animação das moedas
+                createCoins();
+                
+                // Atualizar contador de cópias
                 copyCount++;
                 localStorage.setItem('copyCount', copyCount);
                 document.getElementById('copyCount').textContent = copyCount;
-
-                btn.textContent = '✓ Copiado!';
+                
+                // Feedback visual
+                const btn = document.getElementById('copyBtn');
+                btn.textContent = '✓';
                 setTimeout(() => {
-                    btn.textContent = 'Cópia e Cola';
-                    btn.classList.remove('spin');
+                    btn.textContent = 'R$';
                 }, 1000);
             });
         });
 
-        function createCoins(button) {
-            const rect = button.getBoundingClientRect();
-
-            for (let i = 0; i < 10; i++) {
+        // Criar moedas animadas
+        function createCoins() {
+            const btn = document.getElementById('copyBtn');
+            const btnRect = btn.getBoundingClientRect();
+            
+            for (let i = 0; i < 5; i++) {
                 const coin = document.createElement('div');
                 coin.className = 'coin';
+                
+                // Posição inicial (centro do botão)
+                const startX = btnRect.left + btnRect.width/2 - 10;
+                const startY = btnRect.top + btnRect.height/2 - 10;
+                
+                // Posição final aleatória
+                const endX = startX + (Math.random() * 100 - 50);
+                const endY = startY - 100;
+                
+                coin.style.left = ${startX}px;
+                coin.style.top = ${startY}px;
+                
+                document.body.appendChild(coin);
+                
+                // Remover após animação
+                setTimeout(() => {
+                    coin.remove();
+                }, 1000);
+            }
+        }
 
-                const angle = Math.random() * 2 * Math.PI;
-                const distance = 60 + Math.random() * 40;
-                const x = Math.cos(angle) * distance;
-                const y = Math.sin(angle) * distance;
+        // Botão de reset (aparece somente se pressionar Ctrl+Alt+R)
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.altKey && e.key === 'r') {
+                document.getElementById('resetBtn').style.display = 'inline-block';
+            }
+        });
 
-                coin.style.setProperty('--x', `${x}px`);
-                coin.style.setProperty('--y',
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            if(confirm('Tem certeza que deseja zerar TODOS os contadores?')) {
+                localStorage.setItem('accessCount', 0);
+                localStorage.setItem('copyCount', 0);
+                localStorage.setItem('lastAccessDate', today);
+                document.getElementById('accessCount').textContent = 0;
+                document.getElementById('copyCount').textContent = 0;
+                alert('Contadores zerados com sucesso!');
+                this.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
