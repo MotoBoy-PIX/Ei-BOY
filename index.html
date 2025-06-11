@@ -194,6 +194,11 @@
             text-align: left;
             border-radius: 0 5px 5px 0;
         }
+
+        .loading {
+            color: #ffcc00;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -204,7 +209,7 @@
         <h1>ENTREGUEI SUA ENCOMENDA... <br>E AGORA ENTREGO UM PEDIDO!</h1>
         
         <div class="lgpd-warning">
-            <p>🔒 Este site não coleta dados pessoais. Os contadores usam apenas localStorage anônimo, sem identificação individual.</p>
+            <p>🔒 Este site não coleta dados pessoais. Os contadores são globais e anônimos.</p>
         </div>
         
         <p>Fala aí! Sou motoboy das ruas e dos corres. Enquanto levo suas encomendas, também tô tentando correr atrás dos meus sonhos!</p>
@@ -223,38 +228,73 @@
         <div class="stats">
             <div class="stat-box">
                 <div>Acessos</div>
-                <div class="stat-number" id="accessCount">0</div>
+                <div class="stat-number" id="accessCount"><span class="loading">carregando...</span></div>
             </div>
             <div class="stat-box">
                 <div>PIX Copiados</div>
-                <div class="stat-number" id="copyCount">0</div>
+                <div class="stat-number" id="copyCount"><span class="loading">carregando...</span></div>
             </div>
         </div>
 
-        <button id="resetBtn">Zerar Contadores</button>
+        <button id="resetBtn">Zerar Contadores (Admin)</button>
     </div>
 
+    <!-- Adicione esses scripts antes do seu script principal -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
     <script>
-        // Verifica se é um novo dia
-        const lastAccessDate = localStorage.getItem('lastAccessDate');
-        const today = new Date().toDateString();
-        
-        // Se for um novo dia, zera os contadores
-        if (!lastAccessDate || lastAccessDate !== today) {
-            localStorage.setItem('accessCount', 0);
-            localStorage.setItem('copyCount', 0);
-            localStorage.setItem('lastAccessDate', today);
+        // Configuração do Firebase (substitua com suas credenciais)
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY",
+            authDomain: "SEU_PROJETO.firebaseapp.com",
+            databaseURL: "https://SEU_PROJETO.firebaseio.com",
+            projectId: "SEU_PROJETO",
+            storageBucket: "SEU_PROJETO.appspot.com",
+            messagingSenderId: "SEU_SENDER_ID",
+            appId: "SEU_APP_ID"
+        };
+
+        // Inicialize o Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Referência para os contadores no Firebase
+        const countersRef = database.ref('counters');
+
+        // Função para atualizar contador de acessos
+        function updateAccessCount() {
+            countersRef.child('access').transaction(function(currentValue) {
+                return (currentValue || 0) + 1;
+            }).then(() => {
+                // Atualiza o valor na tela após sucesso
+                countersRef.child('access').on('value', (snapshot) => {
+                    document.getElementById('accessCount').textContent = snapshot.val() || 0;
+                });
+            });
         }
 
-        // Contador de acessos
-        let accessCount = parseInt(localStorage.getItem('accessCount')) || 0;
-        accessCount++;
-        localStorage.setItem('accessCount', accessCount);
-        document.getElementById('accessCount').textContent = accessCount;
+        // Função para atualizar contador de cópias
+        function updateCopyCount() {
+            countersRef.child('copy').transaction(function(currentValue) {
+                return (currentValue || 0) + 1;
+            }).then(() => {
+                // Atualiza o valor na tela após sucesso
+                countersRef.child('copy').on('value', (snapshot) => {
+                    document.getElementById('copyCount').textContent = snapshot.val() || 0;
+                });
+            });
+        }
 
-        // Contador de cópias
-        let copyCount = parseInt(localStorage.getItem('copyCount')) || 0;
-        document.getElementById('copyCount').textContent = copyCount;
+        // Carrega os valores iniciais
+        countersRef.on('value', (snapshot) => {
+            const data = snapshot.val() || { access: 0, copy: 0 };
+            document.getElementById('accessCount').textContent = data.access;
+            document.getElementById('copyCount').textContent = data.copy;
+        });
+
+        // Registra o acesso ao carregar a página
+        updateAccessCount();
 
         // Função para copiar PIX
         document.getElementById('copyBtn').addEventListener('click', function() {
@@ -264,9 +304,7 @@
                 createCoins();
                 
                 // Atualizar contador de cópias
-                copyCount++;
-                localStorage.setItem('copyCount', copyCount);
-                document.getElementById('copyCount').textContent = copyCount;
+                updateCopyCount();
                 
                 // Feedback visual
                 const btn = document.getElementById('copyBtn');
@@ -315,13 +353,9 @@
 
         document.getElementById('resetBtn').addEventListener('click', function() {
             if(confirm('Tem certeza que deseja zerar TODOS os contadores?')) {
-                localStorage.setItem('accessCount', 0);
-                localStorage.setItem('copyCount', 0);
-                localStorage.setItem('lastAccessDate', today);
-                document.getElementById('accessCount').textContent = 0;
-                document.getElementById('copyCount').textContent = 0;
-                alert('Contadores zerados com sucesso!');
-                this.style.display = 'none';
+                countersRef.set({ access: 0, copy: 0 })
+                    .then(() => alert('Contadores zerados com sucesso!'))
+                    .catch(() => alert('Erro ao zerar contadores'));
             }
         });
     </script>
